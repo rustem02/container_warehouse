@@ -69,14 +69,13 @@ class ContainerViewSet(viewsets.ModelViewSet):
         return Response(ContainerSerializer(container).data)
 
 
-class ZoneViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    GET /zones — список зон
-    POST /zones/:id/assign — разместить контейнер в зону (с проверкой capacity)
-    """
+class ZoneViewSet(viewsets.ModelViewSet):
+
 
     queryset = Zone.objects.all().order_by("id")
     serializer_class = ZoneSerializer
+
+    http_method_names = ["get", "post", "head", "options"]
 
     @action(detail=True, methods=["post"], url_path="assign")
     def assign(self, request, pk=None):
@@ -96,4 +95,8 @@ class ZoneViewSet(viewsets.ReadOnlyModelViewSet):
                 )
 
         send_container_event("assigned", container)
-        return Response(ContainerSerializer(container).data, status=status.HTTP_200_OK)
+
+        return Response(
+            ContainerSerializer(container).data,
+            status=status.HTTP_200_OK
+        )
